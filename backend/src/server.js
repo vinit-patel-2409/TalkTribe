@@ -15,27 +15,36 @@ const PORT = process.env.PORT;
 
 const __dirname = path.resolve();
 
-const allowedOrigins = process.env.NODE_ENV === 'production' 
-  ? [
-      process.env.CLIENT_URL,
-      'https://talktribebyvp.vercel.app', // Replace with your actual Vercel URL
-    ]
-  : ['http://localhost:5173', 'http://localhost:5174'];
+// Enable CORS for all routes
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    'https://talktribebyvp.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:5174'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-auth-token');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  
+  next();
+});
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps or curl requests)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-        return callback(new Error(msg), false);
-      }
-      return callback(null, true);
-    },
-    credentials: true, // allow frontend to send cookies
-  })
-);
+// Log all requests for debugging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
+  next();
+});
 
 app.use(express.json());
 app.use(cookieParser());
