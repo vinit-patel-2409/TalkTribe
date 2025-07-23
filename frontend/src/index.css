@@ -2,33 +2,103 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base styles for chat container */
 .str-chat__channel {
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(to bottom, #c9e8c9, #b7e7bb);
   height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 .str-chat__container {
-  max-width: 1200px;
+  max-width: 100%;
   width: 100%;
-  height: 80% !important;
-  margin: 0 auto !important;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  height: 100% !important;
+  margin: 0 !important;
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
 }
 
+/* Message list styles */
 .str-chat__list {
   background-color: #ffffff;
-  padding: 12px;
+  padding: 0.5rem;
+  height: 100%;
+  overflow-y: auto;
 }
 
+/* Hide notifications in the chat list */
 .str-chat__list-notifications {
   display: none;
 }
 
+/* Message input area */
 .str-chat__message-input {
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #e5e7eb;
+  padding: 0.75rem;
+  background-color: #ffffff;
+}
+
+/* Message input textarea */
+.str-chat__message-textarea-container textarea {
+  min-height: 40px !important;
+  max-height: 120px !important;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  resize: none;
+}
+
+/* Message bubbles */
+.str-chat__message {
+  margin-bottom: 0.75rem;
+}
+
+.str-chat__message-simple {
+  max-width: 90%;
+}
+
+/* Message actions */
+.str-chat__message-actions {
+  display: none;
+}
+
+.str-chat__message:hover .str-chat__message-actions {
+  display: flex;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .str-chat__container {
+    border-radius: 0;
+  }
+  
+  .str-chat__message-input {
+    padding: 0.5rem;
+  }
+  
+  .str-chat__message-textarea-container textarea {
+    font-size: 1rem;
+  }
+  
+  .str-chat__message-simple {
+    max-width: 95%;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 390px) {
+  .str-chat__message-textarea-container textarea {
+    font-size: 0.9375rem;
+    padding: 0.4rem;
+  }
+  
+  .str-chat__message-actions {
+    display: none !important;
+  }
 }

@@ -1,78 +1,106 @@
 import { Link, useLocation } from "react-router-dom";
 import useAuthUser from "../hooks/useAuthUser";
-import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon } from "lucide-react";
-
+import { BellIcon, HomeIcon, ShipWheelIcon, UsersIcon, X } from "lucide-react";
 
 const Sidebar = () => {
   const { authUser } = useAuthUser();
   const location = useLocation();
   const currentPath = location.pathname;
 
-
-
   return (
-    <aside className="w-64 bg-base-200 border-r border-base-300 lg:flex flex-col h-screen sticky top-0">
-      <div className="p-5 border-b border-base-300">
+    <aside className="w-64 bg-base-200 border-r border-base-300 flex flex-col h-full fixed md:relative z-40">
+      {/* Close button for mobile */}
+      <div className="md:hidden flex justify-end p-2">
+        <button 
+          onClick={() => document.querySelector('.drawer-toggle').click()}
+          className="btn btn-ghost btn-sm btn-circle"
+          aria-label="Close menu"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      {/* Logo */}
+      <div className="p-4 border-b border-base-300">
         <Link to="/" className="flex items-center gap-2.5">
-          <ShipWheelIcon className="size-9 text-primary" />
-          <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary  tracking-wider">
-            Talktribe
+          <ShipWheelIcon className="h-8 w-8 md:h-9 md:w-9 text-primary" />
+          <span className="text-2xl md:text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
+            TalkTribe
           </span>
         </Link>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
+      {/* Navigation Links */}
+      <nav className="flex-1 p-2 md:p-4 space-y-1 overflow-y-auto">
         <Link
           to="/"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currentPath === "/" ? "btn-active" : ""
+          className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
+            currentPath === "/" 
+              ? "bg-base-300 text-primary" 
+              : "text-base-content hover:bg-base-300/50"
           }`}
+          onClick={() => window.innerWidth < 768 && document.querySelector('.drawer-toggle').click()}
         >
-          <HomeIcon className="size-5 text-base-content opacity-70" />
-          <span>Home</span>
+          <HomeIcon className="h-5 w-5 flex-shrink-0" />
+          <span className="text-sm md:text-base">Home</span>
         </Link>
 
         <Link
           to="/friends"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currentPath === "/friends" ? "btn-active" : ""
+          className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
+            currentPath === "/friends"
+              ? "bg-base-300 text-primary"
+              : "text-base-content hover:bg-base-300/50"
           }`}
+          onClick={() => window.innerWidth < 768 && document.querySelector('.drawer-toggle').click()}
         >
-          <UsersIcon className="size-5 text-base-content opacity-70" />
-          <span>Friends</span>
+          <UsersIcon className="h-5 w-5 flex-shrink-0" />
+          <span className="text-sm md:text-base">Friends</span>
         </Link>
 
         <Link
           to="/notifications"
-          className={`btn btn-ghost justify-start w-full gap-3 px-3 normal-case ${
-            currentPath === "/notifications" ? "btn-active" : ""
+          className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
+            currentPath === "/notifications"
+              ? "bg-base-300 text-primary"
+              : "text-base-content hover:bg-base-300/50"
           }`}
+          onClick={() => window.innerWidth < 768 && document.querySelector('.drawer-toggle').click()}
         >
-          <BellIcon className="size-5 text-base-content opacity-70" />
-          <span>Notifications</span>
+          <BellIcon className="h-5 w-5 flex-shrink-0" />
+          <span className="text-sm md:text-base">Notifications</span>
         </Link>
       </nav>
 
-
-
-      {/* USER PROFILE SECTION */}
-      <Link className='p-4 border-t border-base-300 mt-auto '>
-        <div className="flex items-center gap-3">
-          <div className="avatar">
-            <div className="w-10 rounded-full">
-              <img src={authUser?.profilePic} alt="User Avatar" rel="noreferrer" />
+      {/* User Profile */}
+      <div className='p-3 border-t border-base-300 mt-auto'>
+        <Link to="/profile" className="block hover:bg-base-300/50 rounded-lg p-2 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="avatar">
+              <div className="w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden">
+                <img 
+                  src={authUser?.profilePic || '/default-avatar.png'} 
+                  alt={authUser?.fullName || 'User'} 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/default-avatar.png';
+                  }}
+                />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm truncate">{authUser?.fullName || 'User'}</p>
+              <p className="text-xs text-success flex items-center gap-1">
+                <span className="size-2 rounded-full bg-success inline-block" />
+                Online
+              </p>
             </div>
           </div>
-          <div className="flex-1">
-            <p className="font-semibold text-sm">{authUser?.fullName}</p>
-            <p className="text-xs text-success flex items-center gap-1">
-              <span className="size-2 rounded-full bg-success inline-block" />
-              Online
-            </p>
-          </div>
-        </div>
-      </Link>
+        </Link>
+      </div>
     </aside>
   );
 };
+
 export default Sidebar;

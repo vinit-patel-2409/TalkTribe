@@ -4,54 +4,75 @@ import { BellIcon, LogOutIcon, ShipWheelIcon, Menu } from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
 import useLogout from "../hooks/useLogout";
 
-const Navbar = ({ toggleSidebar }) => {
+const Navbar = ({ toggleSidebar, isMobile = false }) => {
   const { authUser } = useAuthUser();
   const location = useLocation();
   const isChatPage = location.pathname?.startsWith("/chat");
-
   const { logoutMutation } = useLogout();
 
   return (
-    <nav className="bg-base-200 border-b border-base-300 sticky top-0 z-30 h-16 flex items-center">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center gap-2">
-        				<button className='btn btn-ghost btn-circle lg:hidden' onClick={toggleSidebar}>
-					<Menu className='h-6 w-6' />
-				</button>
-          <div className="flex items-center justify-end w-full">
-          {/* LOGO - ONLY IN THE CHAT PAGE */}
-          {isChatPage && (
-            <div className="pl-5">
-              <Link to="/" className="flex items-center gap-2.5">
-                <ShipWheelIcon className="size-9 text-primary" />
-                <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary  tracking-wider">
-                  TalkTribe
-                </span>
-              </Link>
-            </div>
-          )}
-         
-         
-
-          <div className="flex items-center gap-3 sm:gap-4 ml-auto">
-            <Link to={"/notifications"}>
-              <button className="btn btn-ghost btn-circle">
-                <BellIcon className="h-6 w-6 text-base-content opacity-70" />
-              </button>
-            </Link>
-          </div>
-          {/* TODO */}
-          <ThemeSelector />
-
-          <div className="avatar">
-            <div className="w-9 rounded-full">
-              <img src={authUser?.profilePic} alt="User Avatar" rel="noreferrer" />
-            </div>
-          </div>
-
-          {/* Logout button */}
-          <button className="btn btn-ghost btn-circle" onClick={logoutMutation}>
-            <LogOutIcon className="h-6 w-6 text-base-content opacity-70" />
+    <nav className="bg-base-200 border-b border-base-300 sticky top-0 z-30 h-16 flex items-center px-2 sm:px-4">
+      <div className="w-full mx-auto flex items-center justify-between">
+        {/* Left side - Menu button and Logo */}
+        <div className="flex items-center">
+          <button 
+            className="btn btn-ghost btn-circle p-2 mr-1 md:hidden" 
+            onClick={toggleSidebar}
+            aria-label="Toggle menu"
+          >
+            <Menu className="h-5 w-5" />
           </button>
+          
+          {/* Logo - Show on all pages when on mobile */}
+          <Link 
+            to="/" 
+            className={`flex items-center gap-2 ${!isChatPage && isMobile ? 'block' : 'hidden md:flex'}`}
+          >
+            <ShipWheelIcon className="h-7 w-7 md:h-8 md:w-8 text-primary" />
+            <span className="text-xl md:text-2xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
+              TalkTribe
+            </span>
+          </Link>
+          
+          {/* Show logo in chat page on all devices */}
+          {isChatPage && (
+            <Link to="/" className="hidden md:flex items-center gap-2">
+              <ShipWheelIcon className="h-8 w-8 text-primary" />
+              <span className="text-2xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
+                TalkTribe
+              </span>
+            </Link>
+          )}
+        </div>
+
+        {/* Right side navigation */}
+        <div className="flex items-center space-x-1 sm:space-x-2">
+          {/* Notifications */}
+          <Link to={"/notifications"} className="btn btn-ghost btn-circle p-2">
+            <BellIcon className="h-5 w-5 text-base-content opacity-70" />
+          </Link>
+          
+          {/* Theme Selector */}
+          <div className="hidden sm:block">
+            <ThemeSelector />
+          </div>
+          
+          {/* User Avatar */}
+          <div className="dropdown dropdown-end">
+            <div tabIndex={0} className="btn btn-ghost btn-circle avatar p-0">
+              <div className="w-9 rounded-full">
+                <img src={authUser?.profilePic} alt="User Avatar" />
+              </div>
+            </div>
+            <ul className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52">
+              <li>
+                <button onClick={logoutMutation} className="flex items-center justify-between">
+                  Logout
+                  <LogOutIcon className="h-4 w-4" />
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </nav>
