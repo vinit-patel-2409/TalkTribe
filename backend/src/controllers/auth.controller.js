@@ -113,7 +113,19 @@ export async function login(req, res) {
 }
 
 export function logout(req, res) {
-  res.clearCookie("jwt");
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "none",
+    path: "/"
+  };
+  
+  // Set domain in production
+  if (process.env.NODE_ENV === "production") {
+    cookieOptions.domain = ".talktribe.onrender.com";
+  }
+  
+  res.clearCookie("jwt", cookieOptions);
   res.status(200).json({ success: true, message: "Logout successful" });
 }
 

@@ -23,9 +23,11 @@ const STREAM_API_KEY = import.meta.env.VITE_STREAM_API_KEY;
 
 const CallPage = () => {
   const { id: callId } = useParams();
+  const navigate = useNavigate();
   const [client, setClient] = useState(null);
   const [call, setCall] = useState(null);
   const [isConnecting, setIsConnecting] = useState(true);
+  const [error, setError] = useState(null);
 
   const { authUser, isLoading } = useAuthUser();
 
@@ -33,37 +35,61 @@ const CallPage = () => {
     queryKey: ["streamToken"],
     queryFn: getStreamToken,
     enabled: !!authUser,
+    retry: 2,
   });
 
   useEffect(() => {
+    let videoClient;
+    let callInstance;
+
     const initCall = async () => {
-      if (!tokenData.token || !authUser || !callId) return;
+      if (!tokenData?.token || !authUser || !callId) return;
 
       try {
         console.log("Initializing Stream video client...");
+        setError(null);
+        setIsConnecting(true);
 
         const user = {
           id: authUser._id,
           name: authUser.fullName,
-          image: authUser.profilePic,
+          image: authUser.profilePic || undefined,
         };
 
-        const videoClient = new StreamVideoClient({
+        // Initialize the client with the API key
+        videoClient = new StreamVideoClient({
           apiKey: STREAM_API_KEY,
           user,
           token: tokenData.token,
+          options: {
+            logLevel: 'debug', // Enable debug logging
+          },
         });
 
-        const callInstance = videoClient.call("default", callId);
+        // Create or get the call
+        callInstance = videoClient.call("default", callId);
+        
+        // Set up event listeners
+        callInstance.on('call.ended', () => {
+          console.log('Call ended');
+          navigate('/');
+        });
 
+        callInstance.on('error', (err) => {
+          console.error('Call error:', err);
+          setError('An error occurred with the call');
+          toast.error('Call error. Please try again.');
+        });
+
+        // Join the call
         await callInstance.join({ create: true });
-
         console.log("Joined call successfully");
 
         setClient(videoClient);
         setCall(callInstance);
       } catch (error) {
-        console.error("Error joining call:", error);
+        console.error("Error initializing call:", error);
+        setError('Failed to initialize the call');
         toast.error("Could not join the call. Please try again.");
       } finally {
         setIsConnecting(false);
@@ -71,6 +97,18 @@ const CallPage = () => {
     };
 
     initCall();
+
+    // Cleanup function
+    return () => {
+      if (call) {
+        console.log('Cleaning up call...');
+        call.leave().catch(e => console.error('Error leaving call:', e));
+      }
+      if (client) {
+        console.log('Disconnecting client...');
+        client.disconnectUser().catch(e => console.error('Error disconnecting client:', e));
+      }
+    };
   }, [tokenData, authUser, callId]);
 
   if (isLoading || isConnecting) return <PageLoader />;
