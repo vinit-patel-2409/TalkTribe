@@ -22,23 +22,40 @@ const corsOptions = {
       'https://talktribebyvp.vercel.app',
       'http://localhost:5173',
       'http://localhost:5174',
-      'https://talktribe.vercel.app'
+      'https://talktribe.vercel.app',
+      'https://talktribe.onrender.com',
+      'http://localhost:3000'
     ];
     
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    console.log('CORS Origin Check:', { origin, allowedOrigins });
     
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+    // Allow requests with no origin (like mobile apps, curl, or server-to-server requests)
+    if (!origin) {
+      console.log('No origin header - allowing request');
+      return callback(null, true);
+    }
+    
+    // Check if the origin is allowed
+    const originAllowed = allowedOrigins.some(allowedOrigin => 
+      origin === allowedOrigin || 
+      origin.startsWith(allowedOrigin.replace('https://', 'http://')) ||
+      origin.startsWith(allowedOrigin.replace('http://', 'https://'))
+    );
+    
+    if (!originAllowed) {
+      const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}. Allowed origins: ${allowedOrigins.join(', ')}`;
+      console.error('CORS Error:', msg);
       return callback(new Error(msg), false);
     }
     
+    console.log('Origin allowed by CORS:', origin);
     return callback(null, true);
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 600 // Cache preflight request for 10 minutes
 };
 
 // Enable CORS for all routes
