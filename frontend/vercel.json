@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/call/:path*", "destination": "/" },
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
